@@ -1,0 +1,166 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define int long long
+
+FILE *f;
+
+struct Forest{
+    int weight;
+    int root;
+};
+
+struct Tree{
+    int left, right, parent, symbol;
+};
+
+Forest forest[256];
+Tree tree[511];
+
+pair<int, int> min_min(int sz){
+    int mn1 = 10000000000, mn2 = 10000000000;
+    int mn1_ind = 0, mn2_ind = 0;
+    for(int i = 0; i < sz; i++){
+        if(forest[i].weight < mn1){
+            mn2_ind = mn1_ind;
+            mn1_ind = i;
+
+            mn2 = mn1;
+            mn1 = forest[i].weight;
+        }
+        else
+        if(forest[i].weight < mn2){
+            mn2 = forest[i].weight;
+            mn2_ind = i;
+        }
+    }
+    return {mn1_ind, mn2_ind};
+}
+
+signed main(){
+    f = fopen("./input.txt", "rb");
+
+    int freq[256];
+
+
+    for(int i = 0; i < 256; i++){
+        freq[i] = 0;
+    }
+    unsigned char ch;
+    while(fscanf(f, "%c", &ch) != -1){
+        freq[ch]++;
+    }
+
+    int size_forest = 0;
+    int cnt = 0;
+    for(int i = 0; i < 256; i++){
+        //cout << freq[i] << " ";
+        if(freq[i] != 0){
+            forest[size_forest].root = size_forest;
+            forest[size_forest].weight = freq[i];
+            size_forest++;
+            tree[cnt].symbol = i;
+            cnt++;
+        }
+    }
+    int size_tree = size_forest;
+
+    for(int i = 0; i < size_tree; i++){
+        tree[i].left = -1;
+        tree[i].right = -1;
+        tree[i].parent = -1;
+    }
+//    for(int i = 0; i < size_tree; i++){
+//        cout << tree[i].left << " " << tree[i].right << " " << tree[i].parent << " " << tree[i].symbol << endl;
+//    }
+//    cout << endl;
+
+    while(size_forest > 1){
+        pair<int, int> p = min_min(size_forest);
+        int pos1 = p.first, pos2 = p.second;
+
+        tree[size_tree].left = forest[pos1].root;
+        tree[size_tree].right = forest[pos2].root;
+        tree[size_tree].parent = -1;
+
+        tree[forest[pos1].root].parent = size_tree;
+        tree[forest[pos2].root].parent = size_tree;
+
+
+        forest[pos1].weight += forest[pos2].weight;
+        forest[pos1].root = size_tree;
+        forest[pos2] = forest[size_forest - 1];
+        size_forest--;
+        size_tree++;
+    }
+
+//    for(int i = 0; i < size_tree; i++){
+//        cout << i << "  " << tree[i].left << " " << tree[i].right << " " << tree[i].parent << " " << tree[i].symbol << endl;
+//    }
+
+
+    cout << endl;
+
+    vector<string> codes(256);
+
+    for(int i = 0; i < cnt; i++) {
+        int curr = tree[i].parent;
+        string s = "";
+        while (tree[curr].parent != -1) {
+            if (i == tree[curr].left) {
+                s += "0";
+            } else {
+                s += "1";
+            }
+            curr = tree[curr].parent;
+        }
+
+        if (i == tree[curr].left) {
+            s += "0";
+        } else {
+            s += "1";
+        }
+        reverse(s.begin(), s.end());
+        codes[i] = s;
+        cout << s << endl;
+    }
+
+    cout << endl << endl;
+    f = fopen("./input.txt", "rb");
+//    while(fscanf(f, "%c", &ch) != -1){
+//        cout << codes[ch - 97] << endl;
+//    }
+
+    ofstream out;
+    out.open("output.txt");
+    out << "ewf";
+    out.close();
+
+
+    unsigned int byte = 0;
+    int cnt_bits = 0;
+
+    while(fscanf(f, "%c", &ch) != -1){
+
+        string symb = codes[ch - 97];
+
+
+        for (int i = 0; i < symb.size(); i++) {
+            byte <<= 1;
+            byte += symb[i] - '0';
+        }
+        cout << byte << endl;
+    }
+
+
+
+//    int mask = 128;
+//    for(int i = 0; i < 8; i++){
+//        if ((mask & byte) == mask){
+//
+//        }else{
+//
+//        }
+//        mask /= 2;
+//    }
+//    cout << (128 & 164);
+}
